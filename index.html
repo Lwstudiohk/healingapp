@@ -37,10 +37,11 @@
             color: #7f8c8d;
         }
         
+        /* 分類按鈕 */
         .category-container {
             display: flex;
             gap: 8px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
             justify-content: center;
         }
@@ -60,64 +61,32 @@
             box-shadow: 0 2px 8px rgba(74, 124, 89, 0.3);
         }
 
-        .card-container {
-            width: 300px;
-            height: 440px;
-            perspective: 1000px;
-            margin-bottom: 25px;
-            cursor: pointer;
-        }
+        /* 單面療癒卡片（無 3D，直接顯示相片與文字） */
         .card {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            width: 310px;
+            height: 440px;
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-        .card.flipped {
-            transform: rotateY(180deg);
-        }
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-            border-radius: 20px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             padding: 30px 25px;
             text-align: center;
-            overflow: hidden;
+            margin-bottom: 25px;
+            cursor: pointer;
+            background-color: #1a252f;
+            transition: opacity 0.3s ease, transform 0.15s ease;
         }
-        
-        .card-front {
-            background: linear-gradient(135deg, #2c3e50 0%, #4a7c59 100%);
-            color: white;
-            justify-content: center;
-            align-items: center;
-        }
-        .card-front h2 {
-            font-weight: 300;
-            letter-spacing: 2px;
-            font-size: 1.25rem;
-            line-height: 1.8;
+        .card:active {
+            transform: scale(0.98);
         }
 
-        .card-back {
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            color: #ffffff;
-            transform: rotateY(180deg);
-            position: relative;
-            background-color: #1a252f;
-        }
-        
-        .card-back::before {
+        /* 柔和半透明遮罩 */
+        .card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -142,7 +111,7 @@
             padding: 4px 14px;
             border-radius: 12px;
             backdrop-filter: blur(5px);
-align-self: center;
+            align-self: center;
         }
         .card-quote {
             font-size: 1.25rem;
@@ -158,19 +127,16 @@ align-self: center;
             letter-spacing: 1px;
         }
 
+        /* 按鈕 */
         .draw-btn {
             background-color: #4a7c59;
             color: white;
             border: none;
-            padding: 12px 32px;
-            border-radius: 25px;
+            padding: 14px 36px;
+            border-radius: 30px;
             font-size: 1rem;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(74, 124, 89, 0.3);
-            transition: transform 0.1s;
-        }
-        .draw-btn:active {
-            transform: scale(0.95);
         }
     </style>
 </head>
@@ -180,92 +146,44 @@ align-self: center;
         <h1>每日大自然療癒卡</h1>
         <p class="subtitle">點擊卡片或下方按鈕抽牌</p>
     </header>
-
-    <div class="category-container">
-        <button class="cat-btn active" data-cat="all">隨機全部</button>
-        <button class="cat-btn" data-cat="ocean">🌊 海</button>
-        <button class="cat-btn" data-cat="forest">🌲 森林</button>
-        <button class="cat-btn" data-cat="sky">☁️ 天空</button>
+<div class="category-container">
+        <button class="cat-btn active" onclick="setCategory('all', event)">隨機全部</button>
+        <button class="cat-btn" onclick="setCategory('ocean', event)">🌊 海</button>
+        <button class="cat-btn" onclick="setCategory('forest', event)">🌲 森林</button>
+        <button class="cat-btn" onclick="setCategory('sky', event)">☁️ 天空</button>
     </div>
 
-    <div class="card-container" id="cardContainer">
-        <div class="card" id="healingCard">
-            <div class="card-face card-front">
-                <h2>點擊翻牌<br><span style="font-size: 0.85rem; opacity: 0.8;">— 覺察當下 —</span></h2>
-            </div>
-            <div class="card-face card-back" id="cardBack">
-                <div class="card-content">
-                    <div class="card-tag" id="cardCategory">🌊 海 · 擁抱</div>
-                    <div class="card-quote" id="cardText">請給予自己大大的擁抱</div>
-                    <div class="card-footer">深呼吸 · 感受當下</div>
-                </div>
-            </div>
+    <!-- 點擊此處或按鈕即可換下一張牌 -->
+    <div class="card" id="cardElement" onclick="drawCard()">
+        <div class="card-content">
+            <div class="card-tag" id="cardCategory">🌊 海 · 擁抱</div>
+            <div class="card-quote" id="cardText">請給予自己大大的擁抱</div>
+            <div class="card-footer">點擊卡片換下一張</div>
         </div>
     </div>
 
-    <button class="draw-btn" id="drawBtn">換一張卡片</button>
+    <button class="draw-btn" onclick="drawCard()">換一張卡片</button>
 
     <script>
-        // 修正重點：加上了 /healingapp/ 絕對路徑！
         const cardsData = [
-            { category: 'ocean', tag: '🌊 海 · 擁抱', text: '請給予自己大大的擁抱', img: '/healingapp/images/sky1.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 擁抱', text: '請給予自己大大的擁抱', img: '/healingapp/images/s1.jpg' },
             { category: 'ocean', tag: '🌊 海 · 漂流', text: '累了就先隨波漂流一下吧', img: '/healingapp/images/s2.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 活出自我', text: '請你讓自己活成怦然心動的模樣', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800' },
+            { category: 'forest', tag: '🌲 森林 · 活出自我', text: '請你讓自己活成怦然心動的模樣', img: '/healingapp/images/s3.jpg' },
             { category: 'sky', tag: '☁️ 天空 · 轉念', text: '失去是因為這不屬於你的', img: '/healingapp/images/s4.jpg' },
             { category: 'forest', tag: '🌲 森林 · 行動', text: '先完成再完美', img: '/healingapp/images/s5.jpg' },
             { category: 'forest', tag: '🌲 森林 · 選擇', text: '世界很壞但你要善良', img: '/healingapp/images/s6.jpg' }
         ];
 
         let currentCategory = 'all';
-        let isFlipped = false;
 
-        const cardContainer = document.getElementById('cardContainer');
-        const healingCard = document.getElementById('healingCard');
-        const drawBtn = document.getElementById('drawBtn');
+        function setCategory(cat, e) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            drawCard();
+        }
 
-        cardContainer.addEventListener('click', () => {
-            if (!isFlipped) {
-                updateCardContent();
-                healingCard.classList.add('flipped');
-                isFlipped = true;
-            } else {
-                healingCard.classList.remove('flipped');
-                isFlipped = false;
-            }
-        });
-
-        drawBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (isFlipped) {
-                healingCard.classList.remove('flipped');
-                isFlipped = false;
-                setTimeout(() => {
-                    updateCardContent();
-                    healingCard.classList.add('flipped');
-                    isFlipped = true;
-                }, 400);
-            } else {
-                updateCardContent();
-                healingCard.classList.add('flipped');
-                isFlipped = true;
-            }
-        });
-
-        document.querySelectorAll('.cat-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.cat-btn').forEach(b => b.
-classList.remove('active'));
-                e.target.classList.add('active');
-                currentCategory = e.target.getAttribute('data-cat');
-                
-                if (isFlipped) {
-                    healingCard.classList.remove('flipped');
-                    isFlipped = false;
-                }
-            });
-        });
-
-        function updateCardContent() {
+        function drawCard() {
             let filteredCards = cardsData;
             if (currentCategory !== 'all') {
                 filteredCards = cardsData.filter(c => c.category === currentCategory);
@@ -274,10 +192,21 @@ classList.remove('active'));
             const randomIndex = Math.floor(Math.random() * filteredCards.length);
             const selectedCard = filteredCards[randomIndex];
 
-            document.getElementById('cardCategory').innerText = selectedCard.tag;
-            document.getElementById('cardText').innerText = selectedCard.text;
-            document.getElementById('cardBack').style.backgroundImage = url('${selectedCard.img}');
+            const cardEl = document.getElementById('cardElement');
+
+            // 切換效果：輕微淡出淡入
+            cardEl.style.opacity = '0.3';
+            
+            setTimeout(() => {
+                document.getElementById('cardCategory').innerText = selectedCard.tag;
+                document.getElementById('cardText').innerText = selectedCard.text;
+                cardEl.style.backgroundImage = url('${selectedCard.img}');
+                cardEl.style.opacity = '1';
+            }, 150);
         }
+
+        // 初始化
+        drawCard();
     </script>
 </body>
 </html>
