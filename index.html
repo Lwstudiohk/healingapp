@@ -214,7 +214,7 @@ padding: 4px 14px;
     <script>
         // 6張相片資料庫（路徑統一加上 ./ 確保 GitHub Pages 能順利讀取）
         const cardsData = [
-            { category: 'ocean', tag: '🌊 海 · 擁抱', text: '請給予自己大大的擁抱',  img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800' },
+            { category: 'ocean', tag: '🌊 海 · 擁抱', text: '請給予自己大大的擁抱', img: './images/s1.jpg' },
             { category: 'ocean', tag: '🌊 海 · 漂流', text: '累了就先隨波漂流一下吧', img: './images/s2.jpg' },
             { category: 'forest', tag: '🌲 森林 · 活出自我', text: '請你讓自己活成怦然心動的模樣', img: './images/s3.jpg' },
             { category: 'sky', tag: '☁️ 天空 · 轉念', text: '失去是因為這不屬於你的', img: './images/s4.jpg' },
@@ -286,6 +286,240 @@ padding: 4px 14px;
             document.getElementById('cardText').innerText = selectedCard.text;
             document.getElementById('cardBack').style.backgroundImage = url('${selectedCard.img}');
         }
+    </script>
+</body>
+</html>
+https://lwstudiohk.github.io/healingapp/
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日大自然療癒卡</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f4f6f5;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        p.subtitle {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+        
+        .category-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .cat-btn {
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: #e2e8e4;
+            color: #555;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .cat-btn.active {
+            background-color: #4a7c59;
+            color: white;
+            box-shadow: 0 2px 8px rgba(74, 124, 89, 0.3);
+        }
+
+        /* 實體卡片樣式 */
+        .card {
+            width: 310px;
+            height: 440px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px 25px;
+            text-align: center;
+            margin-bottom: 25px;
+            cursor: pointer;
+            background-color: #2c3e50; /* 底色 */
+            transition: transform 0.15s ease;
+        }
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        /* 暗色遮罩，確保文字清晰 */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1;
+        }
+        
+        .card-content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-tag {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 4px 14px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            align-self: center;
+        }
+        .card-quote {
+            font-size: 1.25rem;
+            line-height: 1.7;
+            font-weight: 400;
+            color: #ffffff;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+            margin: auto 0;
+        }
+        .card-footer {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.75);
+            letter-spacing: 1px;
+        }
+        
+        /* 圖片除錯提示 */
+        .debug-msg {
+            font-size: 0.75rem;
+            color: #ff6b6b;
+            background: rgba(0,0,0,0.8);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .draw-btn {
+            background-color: #4a7c59;
+            color: white;
+            border: none;
+            padding: 14px 36px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(74, 124, 89, 0.3);
+}
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>每日大自然療癒卡</h1>
+        <p class="subtitle">點擊卡片或下方按鈕抽牌</p>
+    </header>
+
+    <div class="category-container">
+        <button class="cat-btn active" onclick="setCategory('all', event)">隨機全部</button>
+        <button class="cat-btn" onclick="setCategory('ocean', event)">🌊 海</button>
+        <button class="cat-btn" onclick="setCategory('forest', event)">🌲 森林</button>
+        <button class="cat-btn" onclick="setCategory('sky', event)">☁️ 天空</button>
+    </div>
+
+    <!-- 點擊直接換卡片 -->
+    <div class="card" id="cardElement" onclick="drawCard()">
+        <div class="card-content">
+            <div class="card-tag" id="cardCategory">🌊 海 · 擁抱</div>
+            <div>
+                <div class="card-quote" id="cardText">請給予自己大大的擁抱</div>
+                <div class="debug-msg" id="debugMsg"></div>
+            </div>
+            <div class="card-footer">點擊卡片換下一張</div>
+        </div>
+    </div>
+
+    <button class="draw-btn" onclick="drawCard()">換一張卡片</button>
+
+    <script>
+        const cardsData = [
+            { category: 'ocean', tag: '🌊 海 · 擁抱', text: '請給予自己大大的擁抱', img: 'images/s1.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 漂流', text: '累了就先隨波漂流一下吧', img: 'images/s2.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 活出自我', text: '請你讓自己活成怦然心動的模樣', img: 'images/s3.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '失去是因為這不屬於你的', img: 'images/s4.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 行動', text: '先完成再完美', img: 'images/s5.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 選擇', text: '世界很壞但你要善良', img: 'images/s6.jpg' }
+        ];
+
+        let currentCategory = 'all';
+
+        function setCategory(cat, e) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            drawCard();
+        }
+
+        function drawCard() {
+            let filteredCards = cardsData;
+            if (currentCategory !== 'all') {
+                filteredCards = cardsData.filter(c => c.category === currentCategory);
+            }
+            
+            const randomIndex = Math.floor(Math.random() * filteredCards.length);
+            const selectedCard = filteredCards[randomIndex];
+
+            document.getElementById('cardCategory').innerText = selectedCard.tag;
+            document.getElementById('cardText').innerText = selectedCard.text;
+            
+            const cardEl = document.getElementById('cardElement');
+            const debugEl = document.getElementById('debugMsg');
+
+            // 測試載入圖片
+            const img = new Image();
+            img.src = selectedCard.img;
+            
+            img.onload = function() {
+                cardEl.style.backgroundImage = url('${selectedCard.img}');
+                debugEl.style.display = 'none';
+            };
+            
+            img.onerror = function() {
+                cardEl.style.backgroundImage = 'none';
+                debugEl.innerText = ⚠️ 找不到圖片: ${selectedCard.img};
+                debugEl.style.display = 'block';
+            };
+        }
+
+        // 初始化
+        drawCard();
     </script>
 </body>
 </html>
