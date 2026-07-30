@@ -37,7 +37,6 @@
             color: #7f8c8d;
         }
         
-        /* 分類按鈕 */
         .category-container {
             display: flex;
             gap: 8px;
@@ -61,14 +60,12 @@
             box-shadow: 0 2px 8px rgba(74, 124, 89, 0.3);
         }
 
-        /* 單面療癒卡片（無 3D，直接顯示相片與文字） */
+        /* 療癒卡片容器 */
         .card {
             width: 310px;
             height: 440px;
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            background-size: cover;
-            background-position: center;
             position: relative;
             overflow: hidden;
             display: flex;
@@ -79,18 +76,28 @@
             margin-bottom: 25px;
             cursor: pointer;
             background-color: #1a252f;
-            transition: opacity 0.3s ease, transform 0.15s ease;
+            transition: opacity 0.2s ease, transform 0.15s ease;
         }
         .card:active {
             transform: scale(0.98);
         }
 
+        /* 背景圖片標籤 (填滿整張卡片) */
+        .card-bg-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
         /* 柔和半透明遮罩 */
-        .card::before {
-            content: '';
+        .card-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.45);
             z-index: 1;
         }
         
@@ -127,7 +134,6 @@
             letter-spacing: 1px;
         }
 
-        /* 按鈕 */
         .draw-btn {
             background-color: #4a7c59;
             color: white;
@@ -144,17 +150,22 @@
 
     <header>
         <h1>每日大自然療癒卡</h1>
-        <p class="subtitle">點擊卡片或下方按鈕抽牌</p>
+<p class="subtitle">點擊卡片或下方按鈕抽牌</p>
     </header>
-<div class="category-container">
+
+    <div class="category-container">
         <button class="cat-btn active" onclick="setCategory('all', event)">隨機全部</button>
         <button class="cat-btn" onclick="setCategory('ocean', event)">🌊 海</button>
         <button class="cat-btn" onclick="setCategory('forest', event)">🌲 森林</button>
         <button class="cat-btn" onclick="setCategory('sky', event)">☁️ 天空</button>
     </div>
 
-    <!-- 點擊此處或按鈕即可換下一張牌 -->
+    <!-- 卡片本體 -->
     <div class="card" id="cardElement" onclick="drawCard()">
+        <!-- 實體背景圖片 -->
+        <img id="cardBgImg" class="card-bg-img" src="" alt="療癒卡背景" />
+        <div class="card-overlay"></div>
+
         <div class="card-content">
             <div class="card-tag" id="cardCategory">🌊 海 · 擁抱</div>
             <div class="card-quote" id="cardText">請給予自己大大的擁抱</div>
@@ -165,13 +176,14 @@
     <button class="draw-btn" onclick="drawCard()">換一張卡片</button>
 
     <script>
+        // 圖片路徑（同時提供相對路徑與備用網絡圖片）
         const cardsData = [
-            { category: 'ocean', tag: '🌊 海 · 擁抱', text: '請給予自己大大的擁抱', img: '/healingapp/images/sky1.jpg' },
-            { category: 'ocean', tag: '🌊 海 · 漂流', text: '累了就先隨波漂流一下吧', img: '/healingapp/images/s2.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 擁抱', text: '請給予自己大大的擁抱', img: '111/1.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 漂流', text: '累了就先隨波漂流一下吧', img: '111/11.jpg' },
             { category: 'forest', tag: '🌲 森林 · 活出自我', text: '請你讓自己活成怦然心動的模樣', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800' },
-            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '失去是因為這不屬於你的', img: '/healingapp/111/1.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 行動', text: '先完成再完美', img: '/healingapp/111/11.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 選擇', text: '世界很壞但你要善良', img: '/healingapp/images/s6.jpg' }
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '失去是因為這不屬於你的', img: 'images/s4.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 行動', text: '先完成再完美', img: 'images/s5.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 選擇', text: '世界很壞但你要善良', img: 'images/s6.jpg' }
         ];
 
         let currentCategory = 'all';
@@ -193,14 +205,18 @@
             const selectedCard = filteredCards[randomIndex];
 
             const cardEl = document.getElementById('cardElement');
+            const bgImgEl = document.getElementById('cardBgImg');
 
-            // 切換效果：輕微淡出淡入
+            // 切換動效
             cardEl.style.opacity = '0.3';
             
             setTimeout(() => {
                 document.getElementById('cardCategory').innerText = selectedCard.tag;
                 document.getElementById('cardText').innerText = selectedCard.text;
-                cardEl.style.backgroundImage = url('${selectedCard.img}');
+                
+                // 替換 <img> 標籤的圖片 src
+                bgImgEl.src = selectedCard.img;
+                
                 cardEl.style.opacity = '1';
             }, 150);
         }
