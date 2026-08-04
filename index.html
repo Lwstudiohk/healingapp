@@ -1,4 +1,3 @@
-> Bi:
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
@@ -62,7 +61,7 @@
             box-shadow: 0 2px 8px rgba(74, 124, 89, 0.3);
         }
 
-        /* 療癒卡片 */
+        /* 療癒卡片容器 */
         .card {
             width: 310px;
             height: 440px;
@@ -77,23 +76,25 @@
             text-align: center;
             margin-bottom: 25px;
             cursor: pointer;
-            background-color: #1a252f;
+            background-color: #1a252f; /* 預設底色 */
             transition: opacity 0.2s ease, transform 0.15s ease;
         }
         .card:active {
             transform: scale(0.98);
         }
 
-        /* 背景圖片 - 改用<img>標籤以提高相容性 */
-        .card-bg-img {
+        /* 背景圖片 - 改回CSS背景圖，但在JS中使用相對路徑 */
+        .card-bg {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            background-size: cover;
+            background-position: center;
             z-index: 0;
-            display: none; /* 初始隱藏，讀取完才顯示 */
+            opacity: 0; /* 初始隱藏，讀取完才顯示 */
+            transition: opacity 0.3s ease;
         }
 
         /* 柔和遮罩 */
@@ -144,12 +145,12 @@
             padding: 14px 36px;
             border-radius: 30px;
             font-size: 1rem;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(74, 124, 89, 0.3);
-        }
 
 > Bi:
-</style>
+cursor: pointer;
+            box-shadow: 0 4px 12px rgba(74, 124, 89, 0.3);
+        }
+    </style>
 </head>
 <body>
 
@@ -167,7 +168,8 @@
 
     <!-- 卡片本體 -->
     <div class="card" id="cardElement">
-        <img id="cardBgImg" class="card-bg-img" alt="療癒卡背景" />
+        <!-- 核心修正：改回CSS背景圖層 -->
+        <div id="cardBg" class="card-bg"></div>
         <div class="card-overlay"></div>
 
         <div class="card-content">
@@ -180,82 +182,74 @@
     <button class="draw-btn" id="drawBtn">換一張卡片</button>
 
     <script>
-        // 核心修正：資料庫只存檔名
-        const rawCardsData = [
+        // 核心修正：資料庫使用最穩健的相對路徑 '111/檔名'
+        const cardsData = [
             // ☁️ 天空 (10 句)
-            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '明天的難題，明天自然會有答案。', filename: '1001.jpg' },
-            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '失去，只是因為它從不屬於你。', filename: '1002.jpg' },
-            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '錯過，是為了讓更好的來到你身邊。', filename: '1003.jpg' },
-            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '當你開始相信，整個世界都會跟著轉變。', filename: '1004.jpg' },
-            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '人生是一場課題，學會了，就不必再重複。', filename: '1005.jpg' },
-            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '這場經歷，只是為了讓你學會一件事。', filename: '1006.jpg' },
-            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '活著，或許只是為了到這個星球散散步。', filename: '1007.jpg' },
-            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '會有轉機的，請對宇宙抱持絕對的信任。', filename: '1008.jpg' },
-            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '困住你的從來不是現狀，而是你的執念。', filename: '1009.jpg' },
-            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '結果未必是最完美的，但一定是適合你的。', filename: '1010.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '明天的難題，明天自然會有答案。', img: '111/1001.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '失去，只是因為它從不屬於你。', img: '111/1002.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '錯過，是為了讓更好的來到你身邊。', img: '111/1003.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '當你開始相信，整個世界都會跟著轉變。', img: '111/1004.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '人生是一場課題，學會了，就不必再重複。', img: '111/1005.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '這場經歷，只是為了讓你學會一件事。', img: '111/1006.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '活著，或許只是為了到這個星球散散步。', img: '111/1007.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '會有轉機的，請對宇宙抱持絕對的信任。', img: '111/1008.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '困住你的從來不是現狀，而是你的執念。', img: '111/1009.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '結果未必是最完美的，但一定是適合你的。', img: '111/1010.jpg' },
 
             // 🌊 海 (10 句)
-            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '累了的時候，就先隨波漂流一下吧。', filename: '2001.jpg' },
-            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '請給予現在的自己，一個大大的擁抱。', filename: '2002.jpg' },
-            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '你不需要完美，請放過自己。', filename: '2003.jpg' },
-            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '允許自己破碎，再溫柔地把它拼湊起來。', filename: '2004.jpg' },
-            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '讓該走的流走，回到它原本的位置。', filename: '2005.jpg' },
-            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '別把自己想得太重，也不必背負所有人的情緒。', filename: '2006.jpg' },
-            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '難過時，哭出來也沒關係，笑一笑繼續走。', filename: '2007.jpg' },
-            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '清空內部的陳舊，才有空間讓美好的事物進入。', filename: '2008.jpg' },
-            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '愛的分享是一種流動，讓美好自然傳遞。', filename: '2009.jpg' },
-            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '你已經做得很好，給自己一點掌聲吧。', filename: '2010.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '累了的時候，就先隨波漂流一下吧。', img: '111/2001.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '請給予現在的自己，一個大大的擁抱。', img: '111/2002.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '你不需要完美，請放過自己。', img: '111/2003.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '允許自己破碎，再溫柔地把它拼湊起來。', img: '111/2004.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '讓該走的流走，回到它原本的位置。', img: '111/2005.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '別把自己想得太重，也不必背負所有人的情緒。', img: '111/2006.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '難過時，哭出來也沒關係，笑一笑繼續走。', img: '111/2007.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '清空內部的陳舊，才有空間讓美好的事物進入。', img: '111/2008.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '愛的分享是一種流動，讓美好自然傳遞。', img: '111/2009.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '你已經做得很好，給自己一點掌聲吧。', img: '111/2010.jpg' },
 
             // 🌲 森林 (10 句)
-            { category: 'forest', tag: '🌲 森林 · 成長', text: '請你讓自己活成，怦然心動的模樣。', filename: '3001.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 成長', text: '答案就在你的心中，靜下來問問自己。', filename: '3002.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 成長', text: '先完成，再追求完美。', filename: '3003.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 成長', text: '世界狀態或許複雜，但你可以選擇保持善良。', filename: '3004.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 成長', text: '去吧！勇敢為自己試一次。', filename: '3005.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 成長', text: '你是太陽花，為什麼非要長成玫瑰？', filename: '3006.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 成長', text: '當你懂得愛自己，自然會懂得如何愛世界。', filename: '3007.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 成長', text: '想成為庇蔭他人的大樹，請先讓自己茁壯。', filename: '3008.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 成長', text: '別懷疑，你值得擁有一切美好的事物。', filename: '3009.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '請你讓自己活成，怦然心動的模樣。', img: '111/3001.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '答案就在你的心中，靜下來問問自己。', img: '111/3002.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '先完成，再追求完美。', img: '111/3003.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '世界狀態或許複雜，但你可以選擇保持善良。', img: '111/3004.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '去吧！勇敢為自己試一次。', img: '111/3005.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '你是太陽花，為什麼非要長成玫瑰？', img: '111/3006.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '當你懂得愛自己，自然會懂得如何愛世界。', img: '111/3007.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '想成為庇蔭他人的大樹，請先讓自己茁壯。', img: '111/3008.jpg' },
 
 > Bi:
-{ category: 'forest', tag: '🌲 森林 · 成長', text: '燦爛地為自己燃燒一次吧！', filename: '3010.jpg' }
+{ category: 'forest', tag: '🌲 森林 · 成長', text: '別懷疑，你值得擁有一切美好的事物。', img: '111/3009.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '燦爛地為自己燃燒一次吧！', img: '111/3010.jpg' }
         ];
 
-        let cardsData = []; // 存放預處理過路徑的資料
         let currentCategory = 'all';
 
-        // 核心修正：使用標準的相對路徑解析
-        function resolveImageUrl(filename) {
-            // 獲取 index.html 的所在路徑，並指向平排的 111 資料夾
-            const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            return ${baseUrl}/111/${filename};
-        }
-
-        // 初始化：預處理所有圖片路徑
-        function initData() {
-            cardsData = rawCardsData.map(card => ({
-                ...card,
-                // 先嘗試使用相對路徑，如果失敗再考慮 Blob
-                imgUrl: resolveImageUrl(card.filename)
-            }));
-        }
-
-        // 重新綁定事件，防止卡死
-        function bindEvents() {
+        // 啟動程式：綁定事件並抽第一張卡
+        function initApp() {
+            // 綁定卡片點擊
             document.getElementById('cardElement').addEventListener('click', drawCard);
+            // 綁定按鈕點擊
             document.getElementById('drawBtn').addEventListener('click', drawCard);
             
+            // 綁定分類點擊 (使用事件代理)
             document.getElementById('categoryContainer').addEventListener('click', function(e) {
                 if (e.target.classList.contains('cat-btn')) {
+                    // 切換按鈕樣式
                     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
                     e.target.classList.add('active');
+                    // 更新篩選類別並抽卡
                     currentCategory = e.target.getAttribute('data-cat');
                     drawCard();
                 }
             });
+
+            // 初始化抽第一張卡
+            drawCard();
         }
 
         function drawCard() {
+            // 篩選卡片
             let filteredCards = cardsData;
             if (currentCategory !== 'all') {
                 filteredCards = cardsData.filter(c => c.category === currentCategory);
@@ -263,44 +257,37 @@
             
             if (filteredCards.length === 0) return;
 
+            // 隨機選擇
             const randomIndex = Math.floor(Math.random() * filteredCards.length);
             const selectedCard = filteredCards[randomIndex];
 
             const cardEl = document.getElementById('cardElement');
-            const bgImgEl = document.getElementById('cardBgImg');
+            const bgEl = document.getElementById('cardBg');
             const quoteEl = document.getElementById('cardText');
             const tagEl = document.getElementById('cardCategory');
 
-            // 切換動效
-            cardEl.style.opacity = '0.3';
-            
-            // 預載入圖片，成功後再顯示，防止黑色閃爍
-            const imgLoader = new Image();
-            imgLoader.onload = function() {
-                tagEl.innerText = selectedCard.tag;
-                quoteEl.innerText = selectedCard.text;
-                bgImgEl.src = selectedCard.imgUrl;
-                bgImgEl.style.display = 'block'; // 顯示圖片
-                cardEl.style.opacity = '1';
-            };
-            
-            imgLoader.onerror = function() {
-                // 圖片載入失敗的備案：顯示純色背景和文字
-                console.error('Failed to load image:', selectedCard.imgUrl);
-                tagEl.innerText = selectedCard.tag;
-                quoteEl.innerText = selectedCard.text;
-                bgImgEl.style.display = 'none'; // 隱藏圖片
-                cardEl.style.backgroundColor = '#2c3e50'; // 設定備用底色
-                cardEl.style.opacity = '1';
-            };
+            // 核心修正：不再使用複雜的 JavaScript 圖片預載入邏輯
+            // 直接更新內容，並開啟淡入效果
+            cardEl.style.opacity = '0.5'; // 輕微變暗表示更換中
+            bgEl.style.opacity = '0'; // 隱藏舊背景
 
-            imgLoader.src = selectedCard.imgUrl;
+            // 延時一小會兒更新內容，營造流暢感
+            setTimeout(() => {
+                // 更新文字
+                tagEl.innerText = selectedCard.tag;
+                quoteEl.innerText = selectedCard.text;
+                
+                // 核心修正：直接設定 CSS背景圖相對路徑，讓瀏覽器自己處理路徑解析
+                bgEl.style.backgroundImage = url('${selectedCard.img}');
+                
+                // 顯示新內容
+                cardEl.style.opacity = '1';
+                bgEl.style.opacity = '1';
+            }, 100);
         }
 
-        // 啟動程式
-        initData();
-        bindEvents();
-        drawCard(); // 初始化抽第一張
+        // 確保 DOM 載入後再啟動
+        window.addEventListener('DOMContentLoaded', initApp);
 
     </script>
 </body>
