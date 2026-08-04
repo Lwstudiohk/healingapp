@@ -37,6 +37,7 @@
             color: #7f8c8d;
         }
         
+        /* 分類選擇 */
         .category-container {
             display: flex;
             gap: 8px;
@@ -60,7 +61,7 @@
             box-shadow: 0 2px 8px rgba(74, 124, 89, 0.3);
         }
 
-        /* 療癒卡片容器 */
+        /* 療癒卡片 */
         .card {
             width: 310px;
             height: 440px;
@@ -82,7 +83,7 @@
             transform: scale(0.98);
         }
 
-        /* 背景圖片標籤 (填滿整張卡片) */
+        /* 背景圖片 */
         .card-bg-img {
             position: absolute;
             top: 0;
@@ -93,7 +94,7 @@
             z-index: 0;
         }
 
-        /* 柔和半透明遮罩 */
+        /* 柔和遮罩 */
         .card-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -132,7 +133,9 @@
             font-size: 0.75rem;
             color: rgba(255, 255, 255, 0.75);
             letter-spacing: 1px;
-        }
+
+> Bibbb:
+}
 
         .draw-btn {
             background-color: #4a7c59;
@@ -150,25 +153,24 @@
 
     <header>
         <h1>每日大自然療癒卡</h1>
-<p class="subtitle">點擊卡片或下方按鈕抽牌</p>
+        <p class="subtitle">點擊卡片或下方按鈕抽牌</p>
     </header>
 
     <div class="category-container">
         <button class="cat-btn active" onclick="setCategory('all', event)">隨機全部</button>
+        <button class="cat-btn" onclick="setCategory('sky', event)">☁️ 天空</button>
         <button class="cat-btn" onclick="setCategory('ocean', event)">🌊 海</button>
         <button class="cat-btn" onclick="setCategory('forest', event)">🌲 森林</button>
-        <button class="cat-btn" onclick="setCategory('sky', event)">☁️ 天空</button>
     </div>
 
     <!-- 卡片本體 -->
     <div class="card" id="cardElement" onclick="drawCard()">
-        <!-- 實體背景圖片 -->
         <img id="cardBgImg" class="card-bg-img" src="" alt="療癒卡背景" />
         <div class="card-overlay"></div>
 
         <div class="card-content">
-            <div class="card-tag" id="cardCategory">🌊 海 · 擁抱</div>
-            <div class="card-quote" id="cardText">請給予自己大大的擁抱</div>
+            <div class="card-tag" id="cardCategory">☁️ 天空 · 轉念</div>
+            <div class="card-quote" id="cardText">明天的難題，明天自然會有答案。</div>
             <div class="card-footer">點擊卡片換下一張</div>
         </div>
     </div>
@@ -176,14 +178,46 @@
     <button class="draw-btn" onclick="drawCard()">換一張卡片</button>
 
     <script>
-        // 圖片路徑（同時提供相對路徑與備用網絡圖片）
+        // 圖片存放於平排的 111 資料夾中
+        // 天空：1001-1010 | 大海：2001-2010 | 森林：3001-3010
         const cardsData = [
-            { category: 'ocean', tag: '🌊 海 · 擁抱', text: '請給予自己大大的擁抱', img: '111/1.jpg' },
-            { category: 'ocean', tag: '🌊 海 · 漂流', text: '累了就先隨波漂流一下吧', img: '111/11.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 活出自我', text: '請你讓自己活成怦然心動的模樣', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800' },
-            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '失去是因為這不屬於你的', img: 'images/s4.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 行動', text: '先完成再完美', img: 'images/s5.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 選擇', text: '世界很壞但你要善良', img: 'images/s6.jpg' }
+            // ☁️ 天空 (10 句)
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '明天的難題，明天自然會有答案。', img: '111/1001.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '失去，只是因為它從不屬於你。', img: '111/1002.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '錯過，是為了讓更好的來到你身邊。', img: '111/1003.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '當你開始相信，整個世界都會跟著轉變。', img: '111/1004.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '人生是一場課題，學會了，就不必再重複。', img: '111/1005.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '這場經歷，只是為了讓你學會一件事。', img: '111/1006.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '活著，或許只是為了到這個星球散散步。', img: '111/1007.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '會有轉機的，請對宇宙抱持絕對的信任。', img: '111/1008.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '困住你的從來不是現狀，而是你的執念。', img: '111/1009.jpg' },
+            { category: 'sky', tag: '☁️ 天空 · 轉念', text: '結果未必是最完美的，但一定是適合你的。', img: '111/1010.jpg' },
+
+            // 🌊 海 (10 句)
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '累了的時候，就先隨波漂流一下吧。', img: '111/2001.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '請給予現在的自己，一個大大的擁抱。', img: '111/2002.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '你不需要完美，請放過自己。', img: '111/2003.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '允許自己破碎，再溫柔地把它拼湊起來。', img: '111/2004.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '讓該走的流走，回到它原本的位置。', img: '111/2005.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '別把自己想得太重，也不必背負所有人的情緒。', img: '111/2006.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '難過時，哭出來也沒關係，笑一笑繼續走。', img: '111/2007.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '清空內部的陳舊，才有空間讓美好的事物進入。', img: '111/2008.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '愛的分享是一種流動，讓美好自然傳遞。', img: '111/2009.jpg' },
+            { category: 'ocean', tag: '🌊 海 · 隨緣', text: '你已經做得很好，給自己一點掌聲吧。', img: '111/2010.jpg' },
+
+            // 🌲 森林 (10 句)
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '請你讓自己活成，怦然心動的模樣。', img: '111/3001.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '答案就在你的心中，靜下來問問自己。', img: '111/3002.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '先完成，再追求完美。', img: '111/3003.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '世界狀態或許複雜，但你可以選擇保持善良。', img: '111/3004.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '去吧！勇敢為自己試一次。', img: '111/3005.jpg' },
+
+> Bibbb:
+{ category: 'forest', tag: '🌲 森林 · 成長', text: '你是太陽花，為什麼非要長成玫瑰？', img: '111/3006.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '當你懂得愛自己，自然會懂得如何愛世界。', img: '111/3007.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '想成為庇蔭他人的大樹，請先讓自己茁壯。', img: '111/3008.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '別懷疑，你值得擁有一切美好的事物。', img: '111/3009.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '燦爛地為自己燃燒一次吧！', img: '111/3010.jpg' }
         ];
 
         let currentCategory = 'all';
@@ -207,16 +241,12 @@
             const cardEl = document.getElementById('cardElement');
             const bgImgEl = document.getElementById('cardBgImg');
 
-            // 切換動效
             cardEl.style.opacity = '0.3';
             
             setTimeout(() => {
                 document.getElementById('cardCategory').innerText = selectedCard.tag;
                 document.getElementById('cardText').innerText = selectedCard.text;
-                
-                // 替換 <img> 標籤的圖片 src
                 bgImgEl.src = selectedCard.img;
-                
                 cardEl.style.opacity = '1';
             }, 150);
         }
