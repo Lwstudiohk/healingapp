@@ -1,16 +1,18 @@
+> Bi:
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>每日大自然療癒卡</title>
     <style>
+        /* 基礎樣式：確保在手機端顯示順暢 */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent; /* 移除手機點擊高亮 */
         }
         body {
             background-color: #f4f6f5;
@@ -21,6 +23,7 @@
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
+            overscroll-behavior: none; /* 防止 Safari 彈性滾動 */
         }
         header {
             text-align: center;
@@ -37,23 +40,25 @@
             color: #7f8c8d;
         }
         
-        /* 分類選擇 */
+        /* 分類選擇區域：確保按鈕足夠大，易於點擊 */
         .category-container {
             display: flex;
             gap: 8px;
             margin-bottom: 20px;
             flex-wrap: wrap;
             justify-content: center;
+            width: 100%;
+            max-width: 310px;
         }
         .cat-btn {
             border: none;
-            padding: 8px 16px;
+            padding: 10px 20px; /* 增加點擊區域 */
             border-radius: 20px;
             background-color: #e2e8e4;
             color: #555;
-            font-size: 0.85rem;
+            font-size: 0.9rem; /* 增大字體 */
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background-color 0.2s, color 0.2s;
         }
         .cat-btn.active {
             background-color: #4a7c59;
@@ -76,14 +81,15 @@
             text-align: center;
             margin-bottom: 25px;
             cursor: pointer;
-            background-color: #1a252f; /* 預設底色 */
-            transition: opacity 0.2s ease, transform 0.15s ease;
+            /* 修正核心：圖片載入失敗時的備用底色 */
+            background-color: #1a252f;
+            transition: opacity 0.15s ease-out;
         }
         .card:active {
-            transform: scale(0.98);
+            transform: scale(0.98); /* 點擊反饋 */
         }
 
-        /* 背景圖片 - 改回CSS背景圖，但在JS中使用相對路徑 */
+        /* 背景圖片層 - 使用 CSS 相對路徑，零依賴 JS */
         .card-bg {
             position: absolute;
             top: 0;
@@ -92,12 +98,15 @@
             height: 100%;
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             z-index: 0;
-            opacity: 0; /* 初始隱藏，讀取完才顯示 */
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s ease-in;
+            opacity: 1;
+            /* 初始化：直接載入第一張天空圖 (111/1001.jpg) */
+            background-image: url('111/1001.jpg');
         }
 
-        /* 柔和遮罩 */
+        /* 柔和遮罩：確保文字始終清晰 */
         .card-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -129,8 +138,13 @@
             line-height: 1.7;
             font-weight: 400;
             color: #ffffff;
-            text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+
+> Bi:
+text-shadow: 0 2px 6px rgba(0,0,0,0.7);
             margin: auto 0;
+            /* 防止長文字導致 UI 錯亂 */
+            max-height: 200px;
+            overflow-y: auto;
         }
         .card-footer {
             font-size: 0.75rem;
@@ -138,17 +152,22 @@
             letter-spacing: 1px;
         }
 
+        /* 換卡按鈕：增大區域與字體 */
         .draw-btn {
             background-color: #4a7c59;
             color: white;
             border: none;
-            padding: 14px 36px;
+            padding: 16px 40px;
             border-radius: 30px;
             font-size: 1rem;
-
-> Bi:
-cursor: pointer;
+            font-weight: 500;
+            cursor: pointer;
             box-shadow: 0 4px 12px rgba(74, 124, 89, 0.3);
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        .draw-btn:active {
+            transform: scale(0.96);
+            background-color: #3e6649;
         }
     </style>
 </head>
@@ -160,21 +179,22 @@ cursor: pointer;
     </header>
 
     <div class="category-container" id="categoryContainer">
-        <button class="cat-btn active" data-cat="all">隨機全部</button>
-        <button class="cat-btn" data-cat="sky">☁️ 天空</button>
-        <button class="cat-btn" data-cat="ocean">🌊 海</button>
-        <button class="cat-btn" data-cat="forest">🌲 森林</button>
+        <!-- 核心修正：onclick 移到 JS，移除 data-cat，保持 HTML 清潔 -->
+        <button class="cat-btn active">隨機全部</button>
+        <button class="cat-btn">☁️ 天空</button>
+        <button class="cat-btn">🌊 海</button>
+        <button class="cat-btn">🌲 森林</button>
     </div>
 
-    <!-- 卡片本體 -->
+    <!-- 卡片本體：初始化第一張內容，防止 JS 卡死時畫面空白 -->
     <div class="card" id="cardElement">
-        <!-- 核心修正：改回CSS背景圖層 -->
+        <!-- 初始背景：111/1001.jpg -->
         <div id="cardBg" class="card-bg"></div>
         <div class="card-overlay"></div>
 
         <div class="card-content">
-            <div class="card-tag" id="cardCategory"></div>
-            <div class="card-quote" id="cardText">正在載入療癒句子...</div>
+            <div class="card-tag" id="cardCategory">☁️ 天空 · 轉念</div>
+            <div class="card-quote" id="cardText">明天的難題，明天自然會有答案。</div>
             <div class="card-footer">點擊卡片換下一張</div>
         </div>
     </div>
@@ -182,9 +202,8 @@ cursor: pointer;
     <button class="draw-btn" id="drawBtn">換一張卡片</button>
 
     <script>
-        // 核心修正：資料庫使用最穩健的相對路徑 '111/檔名'
+        // 資料庫保持原樣 (相對路徑)
         const cardsData = [
-            // ☁️ 天空 (10 句)
             { category: 'sky', tag: '☁️ 天空 · 轉念', text: '明天的難題，明天自然會有答案。', img: '111/1001.jpg' },
             { category: 'sky', tag: '☁️ 天空 · 轉念', text: '失去，只是因為它從不屬於你。', img: '111/1002.jpg' },
             { category: 'sky', tag: '☁️ 天空 · 轉念', text: '錯過，是為了讓更好的來到你身邊。', img: '111/1003.jpg' },
@@ -195,8 +214,6 @@ cursor: pointer;
             { category: 'sky', tag: '☁️ 天空 · 轉念', text: '會有轉機的，請對宇宙抱持絕對的信任。', img: '111/1008.jpg' },
             { category: 'sky', tag: '☁️ 天空 · 轉念', text: '困住你的從來不是現狀，而是你的執念。', img: '111/1009.jpg' },
             { category: 'sky', tag: '☁️ 天空 · 轉念', text: '結果未必是最完美的，但一定是適合你的。', img: '111/1010.jpg' },
-
-            // 🌊 海 (10 句)
             { category: 'ocean', tag: '🌊 海 · 隨緣', text: '累了的時候，就先隨波漂流一下吧。', img: '111/2001.jpg' },
             { category: 'ocean', tag: '🌊 海 · 隨緣', text: '請給予現在的自己，一個大大的擁抱。', img: '111/2002.jpg' },
             { category: 'ocean', tag: '🌊 海 · 隨緣', text: '你不需要完美，請放過自己。', img: '111/2003.jpg' },
@@ -207,52 +224,42 @@ cursor: pointer;
             { category: 'ocean', tag: '🌊 海 · 隨緣', text: '清空內部的陳舊，才有空間讓美好的事物進入。', img: '111/2008.jpg' },
             { category: 'ocean', tag: '🌊 海 · 隨緣', text: '愛的分享是一種流動，讓美好自然傳遞。', img: '111/2009.jpg' },
             { category: 'ocean', tag: '🌊 海 · 隨緣', text: '你已經做得很好，給自己一點掌聲吧。', img: '111/2010.jpg' },
-
-            // 🌲 森林 (10 句)
             { category: 'forest', tag: '🌲 森林 · 成長', text: '請你讓自己活成，怦然心動的模樣。', img: '111/3001.jpg' },
-            { category: 'forest', tag: '🌲 森林 · 成長', text: '答案就在你的心中，靜下來問問自己。', img: '111/3002.jpg' },
+
+> Bi:
+{ category: 'forest', tag: '🌲 森林 · 成長', text: '答案就在你的心中，靜下來問問自己。', img: '111/3002.jpg' },
             { category: 'forest', tag: '🌲 森林 · 成長', text: '先完成，再追求完美。', img: '111/3003.jpg' },
             { category: 'forest', tag: '🌲 森林 · 成長', text: '世界狀態或許複雜，但你可以選擇保持善良。', img: '111/3004.jpg' },
             { category: 'forest', tag: '🌲 森林 · 成長', text: '去吧！勇敢為自己試一次。', img: '111/3005.jpg' },
             { category: 'forest', tag: '🌲 森林 · 成長', text: '你是太陽花，為什麼非要長成玫瑰？', img: '111/3006.jpg' },
             { category: 'forest', tag: '🌲 森林 · 成長', text: '當你懂得愛自己，自然會懂得如何愛世界。', img: '111/3007.jpg' },
             { category: 'forest', tag: '🌲 森林 · 成長', text: '想成為庇蔭他人的大樹，請先讓自己茁壯。', img: '111/3008.jpg' },
-
-> Bi:
-{ category: 'forest', tag: '🌲 森林 · 成長', text: '別懷疑，你值得擁有一切美好的事物。', img: '111/3009.jpg' },
+            { category: 'forest', tag: '🌲 森林 · 成長', text: '別懷疑，你值得擁有一切美好的事物。', img: '111/3009.jpg' },
             { category: 'forest', tag: '🌲 森林 · 成長', text: '燦爛地為自己燃燒一次吧！', img: '111/3010.jpg' }
         ];
 
-        let currentCategory = 'all';
+        // 將類別名稱與陣列索引對應 (天->0, 海->1, 森林->2)
+        const categories = ['all', 'sky', 'ocean', 'forest'];
+        let currentCategoryIdx = 0; // 當前類別索引
 
-        // 啟動程式：綁定事件並抽第一張卡
-        function initApp() {
-            // 綁定卡片點擊
-            document.getElementById('cardElement').addEventListener('click', drawCard);
-            // 綁定按鈕點擊
-            document.getElementById('drawBtn').addEventListener('click', drawCard);
-            
-            // 綁定分類點擊 (使用事件代理)
-            document.getElementById('categoryContainer').addEventListener('click', function(e) {
-                if (e.target.classList.contains('cat-btn')) {
-                    // 切換按鈕樣式
-                    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-                    e.target.classList.add('active');
-                    // 更新篩選類別並抽卡
-                    currentCategory = e.target.getAttribute('data-cat');
-                    drawCard();
-                }
-            });
+        // 獲取 DOM 元素
+        const cardEl = document.getElementById('cardElement');
+        const bgEl = document.getElementById('cardBg');
+        const quoteEl = document.getElementById('cardText');
+        const tagEl = document.getElementById('cardCategory');
+        const drawBtn = document.getElementById('drawBtn');
+        const categoryBtns = document.querySelectorAll('.cat-btn');
 
-            // 初始化抽第一張卡
-            drawCard();
-        }
+        // 核心修正：將所有事件初始化放在腳本最末端，確保 DOM 已就緒
 
         function drawCard() {
+            // 根據索引獲取類別名稱
+            const categoryName = categories[currentCategoryIdx];
+            
             // 篩選卡片
             let filteredCards = cardsData;
-            if (currentCategory !== 'all') {
-                filteredCards = cardsData.filter(c => c.category === currentCategory);
+            if (categoryName !== 'all') {
+                filteredCards = cardsData.filter(c => c.category === categoryName);
             }
             
             if (filteredCards.length === 0) return;
@@ -261,33 +268,42 @@ cursor: pointer;
             const randomIndex = Math.floor(Math.random() * filteredCards.length);
             const selectedCard = filteredCards[randomIndex];
 
-            const cardEl = document.getElementById('cardElement');
-            const bgEl = document.getElementById('cardBg');
-            const quoteEl = document.getElementById('cardText');
-            const tagEl = document.getElementById('cardCategory');
-
-            // 核心修正：不再使用複雜的 JavaScript 圖片預載入邏輯
-            // 直接更新內容，並開啟淡入效果
+            // 核心修正：極簡化淡入淡出邏輯，放棄 onload 等待
             cardEl.style.opacity = '0.5'; // 輕微變暗表示更換中
-            bgEl.style.opacity = '0'; // 隱藏舊背景
 
-            // 延時一小會兒更新內容，營造流暢感
+            // 核心修正：使用 CSS背景圖相對路徑，讓瀏覽器處理路徑解析
+            bgEl.style.backgroundImage = url('${selectedCard.img}');
+            
+            // 更新內容
+            tagEl.innerText = selectedCard.tag;
+            quoteEl.innerText = selectedCard.text;
+            
+            // 強制重繪並顯示內容 (防止手機端渲染延遲)
             setTimeout(() => {
-                // 更新文字
-                tagEl.innerText = selectedCard.tag;
-                quoteEl.innerText = selectedCard.text;
-                
-                // 核心修正：直接設定 CSS背景圖相對路徑，讓瀏覽器自己處理路徑解析
-                bgEl.style.backgroundImage = url('${selectedCard.img}');
-                
-                // 顯示新內容
                 cardEl.style.opacity = '1';
-                bgEl.style.opacity = '1';
-            }, 100);
+                // 防止長文沒回到頂部
+                quoteEl.scrollTop = 0;
+            }, 50);
         }
 
-        // 確保 DOM 載入後再啟動
-        window.addEventListener('DOMContentLoaded', initApp);
+        // 綁定點擊事件
+        cardEl.addEventListener('click', drawCard);
+        drawBtn.addEventListener('click', drawCard);
+        
+        // 核心修正：穩健的分類按鈕點擊處理
+        categoryBtns.forEach((btn, index) => {
+            btn.addEventListener('click', function() {
+                // 切換 active 樣式
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                // 更新類別索引
+                currentCategoryIdx = index;
+                // 抽牌
+                drawCard();
+            });
+        });
+
+        // 核心修正：移除對DOMContentLoaded的依賴，腳本執行到此即為DOM就緒
 
     </script>
 </body>
